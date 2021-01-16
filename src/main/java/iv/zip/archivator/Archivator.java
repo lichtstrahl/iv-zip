@@ -25,8 +25,12 @@ public class Archivator {
     private boolean pipeOut;               // Использовать ли pipe в качестве выхода
 
     public static Archivator createDefault(String ... files) {
+        // Убираем первый элемент. Т.к. это флаг
+        List<String> fileList = Arrays.asList(files);
+        fileList.remove(0);
+
         return new Archivator(
-                Arrays.asList(files),
+                fileList,
                 FileManager.create(),
                 DEFAULT_OUTPUT_FILE,
                 false
