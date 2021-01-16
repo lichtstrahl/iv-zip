@@ -1,9 +1,14 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
+
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'iv.zip'
 version '1.0-SNAPSHOT'
+mainClassName = 'iv.zip.Main'
 
 repositories {
     mavenCentral()
