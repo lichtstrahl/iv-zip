@@ -1,16 +1,16 @@
 package iv.zip;
 
-import java.util.Arrays;
+import iv.zip.archivator.Archivator;
 
 public class Main {
     public static void main(String args[]) {
-        System.out.println("Hello, World!");
+        checkArgsCount(args);
 
-        Arrays.stream(args)
-                .forEach(Main::printArg);
+        Archivator.create(args);
     }
 
-    private static void printArg(String arg) {
-        System.out.printf("Arg: %s%n", arg);
+    private static void checkArgsCount(String[] args) {
+        if (args.length == 1)
+            System.out.println("Нужно передать параметры");
     }
 }
