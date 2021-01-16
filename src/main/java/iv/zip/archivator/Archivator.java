@@ -16,8 +16,6 @@ import java.util.zip.ZipOutputStream;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Archivator {
-    private static final int FILE_COUNT_LIMIT = 1;
-
     private List<String> filePaths;
     private FileManager fileManager;
     private String outputZipFilePath;
@@ -28,7 +26,6 @@ public class Archivator {
                 FileManager.create(),
                 "D:/output.zip"
         );
-        archivator.checkCountFiles(files.length);
         return archivator;
     }
 
@@ -59,13 +56,6 @@ public class Archivator {
     // ---
     // PRIVATE
     // ---
-
-    private void checkCountFiles(int count) {
-        if (count != FILE_COUNT_LIMIT)
-            throw new IvZipException(
-                    String.format("Передано файлов: %d. А поддерживается только %d", count, FILE_COUNT_LIMIT)
-            );
-    }
 
     private void zipDir(File inputDir, ZipOutputStream zipOutputStream) throws IOException {
         String inputDirPath = inputDir.getAbsolutePath();
