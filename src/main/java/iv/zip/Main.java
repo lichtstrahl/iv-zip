@@ -6,11 +6,12 @@ public class Main {
     public static void main(String args[]) {
         checkArgsCount(args);
 
-        Archivator.create(args);
+        Archivator archivator = Archivator.create(args);
+        archivator.zipAll();
     }
 
     private static void checkArgsCount(String[] args) {
-        if (args.length == 1)
+        if (args.length == 0)
             System.out.println("Нужно передать параметры");
     }
 }
