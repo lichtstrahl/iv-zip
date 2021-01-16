@@ -10,8 +10,10 @@ import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -68,6 +70,30 @@ public class Archivator {
         }
     }
 
+    public void unzip(File outputDir, File zipFile) {
+        if (!outputDir.exists())
+            outputDir.mkdirs();
+
+        try (
+                ZipInputStream zipStream = new ZipInputStream(new FileInputStream(zipFile))
+        ) {
+
+            for (ZipEntry entry = zipStream.getNextEntry(); Objects.nonNull(entry); entry = zipStream.getNextEntry()) {
+                String entryName = entry.getName();
+                String outFileName = outputDir.getAbsolutePath() + File.separator + entryName;
+                System.out.println("Unzip: " + outFileName);
+
+                if (entry.isDirectory()) {
+                    new File(outFileName).mkdirs();
+                } else {
+                    getDataFromZip(outFileName, zipStream);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     // ---
     // PRIVATE
     // ---
@@ -95,6 +121,17 @@ public class Archivator {
                 FileInputStream inputStream = new FileInputStream(absoluteFile)
         ) {
             IOUtils.copyLarge(inputStream, zipOutputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Чтение данных из архива
+    private void getDataFromZip(String absolutePath, InputStream zipInputStream) {
+        try (
+                FileOutputStream outputStream = new FileOutputStream(absolutePath)
+                ) {
+            IOUtils.copyLarge(zipInputStream, outputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
