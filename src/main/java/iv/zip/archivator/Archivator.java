@@ -18,7 +18,7 @@ import java.util.zip.ZipOutputStream;
 public class Archivator {
     private static final int FILE_COUNT_LIMIT = 1;
 
-    private List<String> fileNames;
+    private List<String> filePaths;
     private FileManager fileManager;
     private String outputZipFilePath;
 
@@ -34,11 +34,26 @@ public class Archivator {
 
     // Сжать все переданные файлы
     public void zipAll() {
-        fileNames.stream()
-                .filter(fileManager::exist)
-                .filter(fileManager::isDir)
-                .map(File::new)
-                .forEach(this::zipDirectory);
+        // Создание дочерних директорий для будущего zip-файла
+        File zipFile = new File(outputZipFilePath);
+        zipFile.getParentFile().mkdirs();
+
+        try (
+                FileOutputStream outputFile = new FileOutputStream(zipFile);
+                ZipOutputStream zipOutputStream = new ZipOutputStream(outputFile);
+        ) {
+            for (String filePath : filePaths) {
+                File file = new File(filePath);
+                if (file.exists()) {
+                    if (file.isDirectory())
+                        zipDir(file, zipOutputStream);
+                    if (file.isFile())
+                        zipFile(file, file.getName(), zipOutputStream);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // ---
@@ -52,29 +67,21 @@ public class Archivator {
             );
     }
 
-    private void zipDirectory(File inputDir) {
-        // Создание дочерних директорий для будущего zip-файла
-        File zipFile = new File(outputZipFilePath);
-        zipFile.getParentFile().mkdirs();
-
+    private void zipDir(File inputDir, ZipOutputStream zipOutputStream) throws IOException {
         String inputDirPath = inputDir.getAbsolutePath();
 
-        try (
-                FileOutputStream outputFile = new FileOutputStream(zipFile);
-                ZipOutputStream zipOutputStream = new ZipOutputStream(outputFile);
-        ) {
-            for (File file : fileManager.listChildFiles(inputDir)) {
-                String absolutePath = file.getAbsolutePath();
-                System.out.println("Zipping: " + absolutePath);
-
-                String entryName = absolutePath.substring(inputDirPath.length() + 1);
-                ZipEntry zipEntry = new ZipEntry(entryName);
-                zipOutputStream.putNextEntry(zipEntry);
-                addDataToZip(absolutePath, zipOutputStream);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (File file : fileManager.listChildFiles(inputDir)) {
+            zipFile(file, file.getAbsolutePath().substring(inputDirPath.length()+1), zipOutputStream);
         }
+    }
+
+    private void zipFile(File file, String fileName, ZipOutputStream zipOutputStream) throws IOException {
+        String absolutePath = file.getAbsolutePath();
+        System.out.println("Zipping: " + absolutePath);
+
+        ZipEntry zipEntry = new ZipEntry(fileName);
+        zipOutputStream.putNextEntry(zipEntry);
+        addDataToZip(absolutePath, zipOutputStream);
     }
 
     // Добавление данных в архив
