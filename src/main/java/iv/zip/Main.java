@@ -11,7 +11,8 @@ public class Main {
     }
 
     private static void checkArgsCount(String[] args) {
-        if (args.length == 0)
-            System.out.println("Нужно передать параметры");
+        if (args.length == 0) {
+            throw new IvZipException("Нужно передать параметры");
+        }
     }
 }
