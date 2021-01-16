@@ -10,34 +10,45 @@ import org.apache.commons.io.IOUtils;
 import java.io.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Archivator {
+    private static final String DEFAULT_OUTPUT_FILE = "output.zip";
+
     private List<String> filePaths;
     private FileManager fileManager;
-    private String outputZipFilePath;
+    private String outputZipFilePath;      // Вывод результата в файл, без pipe
+    private boolean pipeOut;               // Использовать ли pipe в качестве выхода
 
-    public static Archivator create(String ... files) {
-        Archivator archivator = new Archivator(
+    public static Archivator createDefault(String ... files) {
+        return new Archivator(
                 Arrays.asList(files),
                 FileManager.create(),
-                "D:/output.zip"
+                DEFAULT_OUTPUT_FILE,
+                false
         );
-        return archivator;
+    }
+
+    public static Archivator createPipe(String ... files) {
+        return new Archivator(
+                Arrays.asList(files),
+                FileManager.create(),
+                null,
+                true
+        );
     }
 
     // Сжать все переданные файлы
     public void zipAll() {
-        // Создание дочерних директорий для будущего zip-файла
-        File zipFile = new File(outputZipFilePath);
-        zipFile.getParentFile().mkdirs();
-
         try (
-                FileOutputStream outputFile = new FileOutputStream(zipFile);
-                ZipOutputStream zipOutputStream = new ZipOutputStream(outputFile);
+                FileOutputStream outputFile = pipeOut ? null : new FileOutputStream(prepareOutput());
+                ZipOutputStream zipOutputStream = new ZipOutputStream(
+                        Optional.ofNullable((OutputStream)outputFile).orElse(System.out)
+                )
         ) {
             for (String filePath : filePaths) {
                 File file = new File(filePath);
@@ -83,5 +94,14 @@ public class Archivator {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // Подготовка вывода
+    private File prepareOutput() {
+        // Создание дочерних директорий для будущего zip-файла
+        File zipFile = new File(outputZipFilePath);
+        zipFile.getParentFile().mkdirs();
+
+        return zipFile;
     }
 }
