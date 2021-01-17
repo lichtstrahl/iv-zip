@@ -55,15 +55,15 @@ public class Archivator {
                         Optional.ofNullable((OutputStream)outputFile).orElse(System.out)
                 )
         ) {
-            for (String filePath : filePaths) {
-                File file = new File(filePath);
-                if (file.exists()) {
-                    if (file.isDirectory())
-                        zipDir(file, zipOutputStream);
-                    if (file.isFile())
-                        zipFile(file, file.getName(), zipOutputStream);
-                }
-            }
+            filePaths.stream()
+                    .map(File::new)
+                    .filter(File::exists)
+                    .forEach(file -> {
+                        if (file.isDirectory())
+                            zipDir(file, zipOutputStream);
+                        if (file.isFile())
+                            zipFile(file, file.getName(), zipOutputStream);
+                    });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -98,7 +98,7 @@ public class Archivator {
     // PRIVATE
     // ---
 
-    private void zipDir(File inputDir, ZipOutputStream zipOutputStream) throws IOException {
+    private void zipDir(File inputDir, ZipOutputStream zipOutputStream) {
         String inputDirPath = inputDir.getAbsolutePath();
 
         for (File file : fileManager.listChildFiles(inputDir)) {
@@ -106,19 +106,15 @@ public class Archivator {
         }
     }
 
-    private void zipFile(File file, String fileName, ZipOutputStream zipOutputStream) throws IOException {
+    // Сжатие отдельного файла
+    private void zipFile(File file, String fileName, ZipOutputStream zipOutputStream) {
         String absolutePath = file.getAbsolutePath();
 
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOutputStream.putNextEntry(zipEntry);
-        addDataToZip(absolutePath, zipOutputStream);
-    }
-
-    // Добавление данных в архив
-    private void addDataToZip(String absoluteFile, OutputStream zipOutputStream) {
         try (
-                FileInputStream inputStream = new FileInputStream(absoluteFile)
+                FileInputStream inputStream = new FileInputStream(absolutePath)
         ) {
+            ZipEntry zipEntry = new ZipEntry(fileName);
+            zipOutputStream.putNextEntry(zipEntry);
             IOUtils.copyLarge(inputStream, zipOutputStream);
         } catch (IOException e) {
             e.printStackTrace();
