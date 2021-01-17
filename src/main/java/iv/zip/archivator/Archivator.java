@@ -55,7 +55,7 @@ public class Archivator {
                         Optional.ofNullable((OutputStream)outputFile).orElse(System.out)
                 )
         ) {
-            filePaths.stream()
+            filePaths.parallelStream()
                     .map(File::new)
                     .filter(File::exists)
                     .forEach(file -> {
@@ -76,12 +76,10 @@ public class Archivator {
         try (
                 ZipInputStream zipStream = new ZipInputStream(inputStream)
         ) {
-
             for (ZipEntry entry = zipStream.getNextEntry(); Objects.nonNull(entry); entry = zipStream.getNextEntry()) {
                 String entryName = entry.getName();
                 String outFileName = outputDir.getAbsolutePath() + File.separator + entryName;
                 System.out.println("Unzip: " + outFileName);
-
 
                 File parentDir = new File(outFileName).getParentFile();
                 if (!parentDir.exists())
@@ -101,9 +99,11 @@ public class Archivator {
     private void zipDir(File inputDir, ZipOutputStream zipOutputStream) {
         String inputDirPath = inputDir.getAbsolutePath();
 
-        for (File file : fileManager.listChildFiles(inputDir)) {
-            zipFile(file, file.getAbsolutePath().substring(inputDirPath.length()+1), zipOutputStream);
-        }
+        fileManager.listChildFiles(inputDir)
+                .parallelStream()
+                .forEach(file ->
+                        zipFile(file, file.getAbsolutePath().substring(inputDirPath.length()+1), zipOutputStream)
+                );
     }
 
     // Сжатие отдельного файла
