@@ -3,6 +3,7 @@ package iv.zip;
 import iv.zip.archivator.Archivator;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -13,49 +14,37 @@ public class Main {
     private static final String NON_PIPE_KEY = "--non-pipe";
 
     public static void main(String[] args) {
-        boolean needZip = inputPipePocessing();
+        switch (inputPipePocessing()) {
+            case ZIP:
+                Archivator archivator = args[0].equals(NON_PIPE_KEY)
+                        ? Archivator.createDefault(args)
+                        : Archivator.createPipe(args);
+                archivator.zipAll();
+                break;
 
-        if (needZip) {
-            Archivator archivator = args[0].equals(NON_PIPE_KEY)
-                    ? Archivator.createDefault(args)
-                    : Archivator.createPipe(args);
-            archivator.zipAll();
+            case UNZIP:
+                Archivator unzipper = Archivator.createDefault();
+                unzipper.unzip(new File("./output"), System.in);
+                break;
         }
     }
 
     // Обработка входного pipe
-    private static boolean inputPipePocessing() {
+    private static TypeProcess inputPipePocessing() {
         try {
             int available = System.in.available();
             System.out.println("In available " + available);
 
-            return available == 0;
+            return available == 0 ? TypeProcess.ZIP : TypeProcess.UNZIP;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return false;
+        return TypeProcess.ZIP;
     }
 
-    public static boolean hasInputPipe() {
-        try (
-                InputStreamReader isReader = new InputStreamReader(System.in)
-        ) {
-            return isReader.ready();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        return false;
-    }
-
-    public static int sizeInputPipe() {
-        try {
-            return System.in.available();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return -1;
+    private enum TypeProcess {
+        ZIP, UNZIP
     }
 }

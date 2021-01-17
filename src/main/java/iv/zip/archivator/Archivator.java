@@ -69,12 +69,12 @@ public class Archivator {
         }
     }
 
-    public void unzip(File outputDir, File zipFile) {
+    public void unzip(File outputDir, InputStream inputStream) {
         if (!outputDir.exists())
             outputDir.mkdirs();
 
         try (
-                ZipInputStream zipStream = new ZipInputStream(new FileInputStream(zipFile))
+                ZipInputStream zipStream = new ZipInputStream(inputStream)
         ) {
 
             for (ZipEntry entry = zipStream.getNextEntry(); Objects.nonNull(entry); entry = zipStream.getNextEntry()) {
