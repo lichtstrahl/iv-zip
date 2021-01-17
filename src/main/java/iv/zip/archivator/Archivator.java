@@ -2,6 +2,7 @@ package iv.zip.archivator;
 
 import iv.zip.IvZipException;
 import iv.zip.Logger;
+import iv.zip.StreamHolder;
 import iv.zip.file.FileManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -56,14 +57,15 @@ public class Archivator {
                         Optional.ofNullable((OutputStream)outputFile).orElse(System.out)
                 )
         ) {
+            StreamHolder zipStreamHolder = StreamHolder.create(zipOutputStream);
             filePaths.parallelStream()
                     .map(File::new)
                     .filter(File::exists)
                     .forEach(file -> {
                         if (file.isDirectory())
-                            zipDir(file, zipOutputStream);
+                            zipDir(file, zipStreamHolder);
                         if (file.isFile())
-                            zipFile(file, file.getName(), zipOutputStream);
+                            zipFile(file, file.getName(), zipStreamHolder);
                     });
         } catch (IOException e) {
             e.printStackTrace();
@@ -97,27 +99,26 @@ public class Archivator {
     // PRIVATE
     // ---
 
-    private void zipDir(File inputDir, ZipOutputStream zipOutputStream) {
-        String inputDirPath = inputDir.getAbsolutePath();
+    private void zipDir(File inputDir, StreamHolder zipOutputStream) {
+        final String inputDirPath = inputDir.getAbsolutePath();
+        final int inputDirPathLength = inputDirPath.length()+1;
 
         fileManager.listChildFiles(inputDir)
                 .stream()
                 .forEach(file -> {
                     Logger.INSTANCE.log("File: %s, thread: %s\n", file.getName(), Thread.currentThread().getName());
-                    zipFile(file, file.getAbsolutePath().substring(inputDirPath.length()+1), zipOutputStream);
+                    zipFile(file, file.getAbsolutePath().substring(inputDirPathLength), zipOutputStream);
                 });
     }
 
     // Сжатие отдельного файла
-    private void zipFile(File file, String fileName, ZipOutputStream zipOutputStream) {
+    private void zipFile(File file, String fileName, StreamHolder zipOutputStream) {
         String absolutePath = file.getAbsolutePath();
 
         try (
                 FileInputStream inputStream = new FileInputStream(absolutePath)
         ) {
-            ZipEntry zipEntry = new ZipEntry(fileName);
-            zipOutputStream.putNextEntry(zipEntry);
-            IOUtils.copyLarge(inputStream, zipOutputStream);
+            zipOutputStream.writeZipData(fileName, inputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }

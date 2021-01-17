@@ -18,7 +18,7 @@ public enum Logger {
         }
     }
 
-    public void log(String format, Object ... args) {
+    public synchronized void log(String format, Object ... args) {
         String msg = String.format(format, args);
 
         try {
