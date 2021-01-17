@@ -22,7 +22,7 @@ public class Main {
 
             case UNZIP:
                 Archivator unzipper = Archivator.createPipe();
-                unzipper.unzip(new File("./output"), System.in);
+                unzipper.unzip(new File("./"), System.in);
                 break;
         }
     }
