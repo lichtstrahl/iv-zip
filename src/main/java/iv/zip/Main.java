@@ -2,10 +2,8 @@ package iv.zip;
 
 import iv.zip.archivator.Archivator;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class Main {
 
@@ -23,7 +21,7 @@ public class Main {
                 break;
 
             case UNZIP:
-                Archivator unzipper = Archivator.createDefault();
+                Archivator unzipper = Archivator.createPipe();
                 unzipper.unzip(new File("./output"), System.in);
                 break;
         }
@@ -33,7 +31,6 @@ public class Main {
     private static TypeProcess inputPipePocessing() {
         try {
             int available = System.in.available();
-            System.out.println("In available " + available);
 
             return available == 0 ? TypeProcess.ZIP : TypeProcess.UNZIP;
         } catch (IOException e) {

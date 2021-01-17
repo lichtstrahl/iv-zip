@@ -82,11 +82,12 @@ public class Archivator {
                 String outFileName = outputDir.getAbsolutePath() + File.separator + entryName;
                 System.out.println("Unzip: " + outFileName);
 
-                if (entry.isDirectory()) {
-                    new File(outFileName).mkdirs();
-                } else {
-                    getDataFromZip(outFileName, zipStream);
-                }
+
+                File parentDir = new File(outFileName).getParentFile();
+                if (!parentDir.exists())
+                    parentDir.mkdirs();
+                getDataFromZip(outFileName, zipStream);
+
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,7 +108,6 @@ public class Archivator {
 
     private void zipFile(File file, String fileName, ZipOutputStream zipOutputStream) throws IOException {
         String absolutePath = file.getAbsolutePath();
-        System.out.println("Zipping: " + absolutePath);
 
         ZipEntry zipEntry = new ZipEntry(fileName);
         zipOutputStream.putNextEntry(zipEntry);
