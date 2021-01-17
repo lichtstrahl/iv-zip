@@ -28,8 +28,7 @@ public class Archivator {
 
     public static Archivator createDefault(String ... files) {
         // Убираем первый элемент. Т.к. это флаг
-        List<String> fileList = Arrays.asList(files);
-        fileList.remove(0);
+        List<String> fileList = Arrays.asList(files).subList(1, files.length);
 
         return new Archivator(
                 fileList,
@@ -51,7 +50,7 @@ public class Archivator {
     // Сжать все переданные файлы
     public void zipAll() {
         try (
-                FileOutputStream outputFile = pipeOut ? null : new FileOutputStream(prepareOutput());
+                FileOutputStream outputFile = pipeOut ? null : new FileOutputStream(new File(outputZipFilePath));
                 ZipOutputStream zipOutputStream = new ZipOutputStream(
                         Optional.ofNullable((OutputStream)outputFile).orElse(System.out)
                 )
@@ -135,14 +134,5 @@ public class Archivator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    // Подготовка вывода
-    private File prepareOutput() {
-        // Создание дочерних директорий для будущего zip-файла
-        File zipFile = new File(outputZipFilePath);
-        zipFile.getParentFile().mkdirs();
-
-        return zipFile;
     }
 }
