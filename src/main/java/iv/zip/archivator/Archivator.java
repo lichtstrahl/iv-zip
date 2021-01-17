@@ -1,6 +1,7 @@
 package iv.zip.archivator;
 
 import iv.zip.IvZipException;
+import iv.zip.Logger;
 import iv.zip.file.FileManager;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -100,10 +101,11 @@ public class Archivator {
         String inputDirPath = inputDir.getAbsolutePath();
 
         fileManager.listChildFiles(inputDir)
-                .parallelStream()
-                .forEach(file ->
-                        zipFile(file, file.getAbsolutePath().substring(inputDirPath.length()+1), zipOutputStream)
-                );
+                .stream()
+                .forEach(file -> {
+                    Logger.INSTANCE.log("File: %s, thread: %s\n", file.getName(), Thread.currentThread().getName());
+                    zipFile(file, file.getAbsolutePath().substring(inputDirPath.length()+1), zipOutputStream);
+                });
     }
 
     // Сжатие отдельного файла
