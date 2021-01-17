@@ -4,7 +4,6 @@ import iv.zip.archivator.Archivator;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class Main {
@@ -14,37 +13,28 @@ public class Main {
     private static final String NON_PIPE_KEY = "--non-pipe";
 
     public static void main(String[] args) {
-        inputPipePocessing();
+        boolean needZip = inputPipePocessing();
 
-        Archivator archivator = args[0].equals(NON_PIPE_KEY)
-                ? Archivator.createDefault(args)
-                : Archivator.createPipe(args);
-        archivator.zipAll();
+        if (needZip) {
+            Archivator archivator = args[0].equals(NON_PIPE_KEY)
+                    ? Archivator.createDefault(args)
+                    : Archivator.createPipe(args);
+            archivator.zipAll();
+        }
     }
 
     // Обработка входного pipe
-    private static void inputPipePocessing() {
-        try (
-                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))
-        ) {
-            if (reader.ready()) {
-                System.out.println("Input buffer is ready, size: " + System.in.available());
-            } else
-                return;
+    private static boolean inputPipePocessing() {
+        try {
+            int available = System.in.available();
+            System.out.println("In available " + available);
 
-            String line = null;
-            while (true) {
-                if ((line = reader.readLine()) != null) {
-                    System.out.println("echo>>");
-                } else {
-                    break;
-                }
-            }
-
-
+            return available == 0;
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return false;
     }
 
     public static boolean hasInputPipe() {
