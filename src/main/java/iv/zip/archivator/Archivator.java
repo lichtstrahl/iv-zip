@@ -103,11 +103,8 @@ public class Archivator {
         final int inputDirPathLength = inputDirPath.length()+1;
 
         fileManager.listChildFiles(inputDir)
-                .stream()
-                .forEach(file -> {
-                    Logger.INSTANCE.log("File: %s, thread: %s\n", file.getName(), Thread.currentThread().getName());
-                    zipStreamHolder.writeZipData(file.getAbsolutePath().substring(inputDirPathLength), file);
-                });
+                .forEach(file -> zipStreamHolder.writeZipData(file.getAbsolutePath().substring(inputDirPathLength), file)
+                );
     }
 
     // Чтение данных из архива

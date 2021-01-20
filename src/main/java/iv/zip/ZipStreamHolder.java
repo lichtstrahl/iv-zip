@@ -20,7 +20,7 @@ public class ZipStreamHolder {
         return holder;
     }
 
-    // Сжатие отдельного файла
+    // Сжатие отдельного файла. Метод synchronyzed для будущей многопоточности
     public synchronized void writeZipData(String fileName, File inputFile) {
         String absoluteInputPath = inputFile.getAbsolutePath();
 
