@@ -57,7 +57,7 @@ public class Archivator {
                 )
         ) {
             ZipStreamHolder zipStreamHolder = ZipStreamHolder.create(zipOutputStream);
-            filePaths.parallelStream()
+            filePaths.stream()
                     .map(File::new)
                     .filter(File::exists)
                     .forEach(file -> {
@@ -104,7 +104,6 @@ public class Archivator {
 
         fileManager.listChildFiles(inputDir)
                 .stream()
-                .parallel()
                 .forEach(file -> {
                     Logger.INSTANCE.log("File: %s, thread: %s\n", file.getName(), Thread.currentThread().getName());
                     zipStreamHolder.writeZipData(file.getAbsolutePath().substring(inputDirPathLength), file);
